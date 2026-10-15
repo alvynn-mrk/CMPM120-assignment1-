@@ -6,7 +6,7 @@ class Start extends Scene {
 
     handleNavigation() {
         var start = this.engine.storyData.start;  
-        this.engine.gotoScene(Room, start.x, start.y, {"items": {}, "steps": 0});
+        this.engine.gotoScene(Room, start.x, start.y, {"items": {}, "steps": 0, "bonus": 0, "used": {}});
     }
 }
 
@@ -15,6 +15,7 @@ class Room extends Scene {
     {
         this.x = x;
         this.y = y;
+        this.player = player;
         var roomData = this.engine.storyData.rooms[x + "_" + y];
         if (!roomData.items)
         {
@@ -56,33 +57,32 @@ class Room extends Scene {
         {
             this.addInteractions(player);
             
-            this.engine.addInteraction("Do something", "x", "y");
             // navigation cells come in a 3x3 grid
             // row 1
             this.engine.addTextCell();
-            if (this.engine.storyData.rooms[x+"_"+(y-1)])
+            if (this.canEnter(x, y-1, player))
                 this.engine.addNavigationCell("Go North", x, y-1, player);
             else
-                this.engine.addTextCell();
+                this.engine.addTextCell(this.lockedText(x, y-1, player));
             this.engine.addTextCell();
 
             // row 2
-            if (this.engine.storyData.rooms[(x-1)+"_"+y])
+            if (this.canEnter(x-1, y, player))
                 this.engine.addNavigationCell("Go West", x-1, y, player);
             else
-                this.engine.addTextCell();
+                this.engine.addTextCell(this.lockedText(x-1, y, player));
             this.engine.addTextCell("You are here");
-            if (this.engine.storyData.rooms[(x+1)+"_"+y])
+            if (this.canEnter(x+1, y, player))
                 this.engine.addNavigationCell("Go East", x+1, y, player);
             else
-                this.engine.addTextCell();
+                this.engine.addTextCell(this.lockedText(x+1, y, player));
 
             // row 3
             this.engine.addTextCell();
-            if (this.engine.storyData.rooms[x+"_"+(y+1)])
+            if (this.canEnter(x, y+1, player))
                 this.engine.addNavigationCell("Go South", x, y+1, player);
             else
-                this.engine.addTextCell();
+                this.engine.addTextCell(this.lockedText(x, y+1, player));
             this.engine.addTextCell();
         }
         this.engine.transition();
@@ -93,7 +93,7 @@ class Room extends Scene {
 
     canEnter(x, y, player)
     {
-        var room = this.engine.storyData.rooms[x + "_" + y]:
+        var room = this.engine.storyData.rooms[x + "_" + y];
         if (!room)
         {
             return false;
@@ -103,7 +103,7 @@ class Room extends Scene {
 
     lockedText(x, y, player)
     { 
-        var room = this.engine.storyData.rooms[x + "_" + y]:
+        var room = this.engine.storyData.rooms[x + "_" + y];
         if (room && room.requires)
         {
             return "Locked. Needs: " + room.requires.join(", ");
@@ -194,13 +194,19 @@ class Room extends Scene {
     {
         this.engine.show("You have reached the exit! Congratulations!");
         var items = "Items collected:";
+        var points = player.bonus;
+        var values = this.engine.storyData.values || {};
         for(var item in player.items)
         {
             items += this.engine.itemString(item) + " x" + player.items[item] + " ";
+            // each item is worth its number in the map file, or 1 if it isn't listed
+            points += (values[item] || 1) * player.items[item];
         }
         this.engine.show(items);
         this.engine.show("Total steps taken: " + player.steps);
-        let score = Object.keys(player.items).length /player.steps;
+        this.engine.show("Total points: " + points);
+        // score = points divided by steps
+        let score = (points / player.steps).toFixed(2);
         this.engine.show("Your score is: " + score);
         this.engine.show(this.engine.storyData.credits);
     }
