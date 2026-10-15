@@ -3,7 +3,7 @@
     "credits": "Created by Alvin Mark (akmark@ucsc.edu).",
     "start": {"x": 0, "y": 0},
     "exit": {"x": 3, "y": 3},
-    "vales": {"key": 3, "nazar_amulet": 5, "vampire": 4, "hammer": 2, "alarm_clock": 2, "giraffe": 3},
+    "values": {"key": 3, "nazar_amulet": 5, "vampire": 4, "hammer": 2, "alarm_clock": 2, "giraffe": 3},
 
     "interactions":[
         {"label": "Ring the alarm clock", "needs": ["alarm_clock"],
