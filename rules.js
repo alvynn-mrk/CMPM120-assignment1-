@@ -93,7 +93,7 @@ class Room extends Scene {
 
     canEnter(x, y, player)
     {
-        var room = this.engine.storyData.rooms[x + "_" + y];
+        var room = this.engine.storyData.rooms[x + "_" + y]:
         if (!room)
         {
             return false;
